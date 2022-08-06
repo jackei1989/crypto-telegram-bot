@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cryptoTelegramBot/telegram"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -43,8 +44,12 @@ func convertToInt(s string) int {
 }
 
 func main() {
+	telegram.SendMessage("508510759", "Hello World")
+	getData("BTCUSDT", "1d")
+}
 
-	response, err := http.Get("https://www.binance.com/api/v3/uiKlines?limit=1&symbol=BTCUSDT&interval=4h")
+func getData(symbol string, interval string) {
+	response, err := http.Get("https://www.binance.com/api/v3/uiKlines?limit=1&symbol=" + symbol + "&interval=" + interval)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -52,6 +57,9 @@ func main() {
 	defer response.Body.Close()
 
 	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	data := binanceData{}
 
@@ -71,7 +79,7 @@ func main() {
 
 	for _, v := range data {
 		var candle candle
-		candle.OpenTime = convertToInt(fmt.Sprint(v[0])) 
+		candle.OpenTime = convertToInt(fmt.Sprint(v[0]))
 		candle.Open = convertToFloat64(fmt.Sprint(v[1]))
 		candle.High = convertToFloat64(fmt.Sprint(v[2]))
 		candle.Low = convertToFloat64(fmt.Sprint(v[3]))
@@ -80,5 +88,4 @@ func main() {
 		candle.CloseTime = convertToInt(fmt.Sprint(v[6]))
 		fmt.Println(candle)
 	}
-
 }
